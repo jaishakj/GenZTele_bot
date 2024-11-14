@@ -29,13 +29,13 @@ API_HASH = '9afd3f1e0c388947c25e0200e1324340'
 GROUP_USERNAME = 'genzthing'
 
 async def search_files(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Search for files, photos, and videos with pagination."""
+    """Search for files and videos with pagination."""
     keyword = update.message.text.lower()
     
     try:
         # Send initial processing message
         status_msg = await update.message.reply_text(
-            "🔍 Searching for media... Please wait."
+            "🔍 Starting search... Please wait."
         )
 
         # Create and start the client
@@ -52,22 +52,22 @@ async def search_files(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
             found_media = []
             processed_count = 0
+            batch_size = 1000  # Process messages in larger batches
             
             try:
-                # Update status periodically
-                await status_msg.edit_text("🔍 Searching documents... Please wait.")
+                # Update status for document search
+                await status_msg.edit_text("🔍 Searching for documents...")
                 
-                # Get messages with documents
+                # Search documents with pagination
                 async for msg in client.iter_messages(
                     GROUP_USERNAME,
                     limit=10000,  # Increased limit
                     filter=InputMessagesFilterDocument
                 ):
                     processed_count += 1
-                    logger.debug(f"Processing document message {msg.id}")
                     
-                    # Update status every 1000 messages
-                    if processed_count % 1000 == 0:
+                    # Show progress every 500 messages
+                    if processed_count % 500 == 0:
                         await status_msg.edit_text(f"🔍 Processed {processed_count} messages...")
                     
                     if msg.document:
